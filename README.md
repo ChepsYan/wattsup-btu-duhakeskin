@@ -2,6 +2,7 @@
 
 Web Tabanlı Programlama Dersi Ödevi için hazırladığım 2D oyun projesi.
 Örnek Alınan Oyun: Wattsup - https://bijoykochar.itch.io/wattsup
+Oyun Linki: https://chepsyan.github.io/wattsup-btu-duhakeskin.io/
 Oyun Bilgilendirme Linki:
 https://youtu.be/yS-5G2AAH7I
 

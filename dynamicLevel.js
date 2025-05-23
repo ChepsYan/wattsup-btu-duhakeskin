@@ -1745,7 +1745,6 @@ export class DynamicLevelManager {
         try {
           const wasInRange = entity.playerInRange;
           entity.updateWithPlayer(deltaTime, playerPos);
-          updatedCount++;
 
           if (entity.playerInRange) {
             doorsInRange++;
