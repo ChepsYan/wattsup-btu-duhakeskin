@@ -1,0 +1,28 @@
+{
+  "id": "straight",
+  "name": "Düz Koridor",
+  "size": [10, 6],
+  "exits": { 
+    "E": [9, 3],
+    "W": [0, 3]
+  },
+  "prefabs": [
+    {
+      "type": "LaserEmitter",
+      "pos": [2, 3],
+      "dir": "E",
+      "id": "emitter1"
+    },
+    {
+      "type": "Button",
+      "pos": [5, 2],
+      "id": "btn1",
+      "targets": ["emitter1"]
+    },
+    {
+      "type": "PowerCell",
+      "pos": [7, 3],
+      "id": "cell1"
+    }
+  ]
+} 

@@ -1,0 +1,17 @@
+{
+  "id": "start",
+  "name": "Başlangıç Odası",
+  "size": [8, 8],
+  "start": true,
+  "exits": { 
+    "N": [4, 0],
+    "E": [7, 4]
+  },
+  "prefabs": [
+    {
+      "type": "Player",
+      "pos": [4, 4],
+      "id": "player_start"
+    }
+  ]
+} 

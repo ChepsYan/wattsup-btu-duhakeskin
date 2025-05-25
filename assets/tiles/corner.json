@@ -1,0 +1,28 @@
+{
+  "id": "corner",
+  "name": "L-Köşe",
+  "size": [10, 8],
+  "exits": { 
+    "E": [7, 4],
+    "S": [4, 7]
+  },
+  "prefabs": [
+    {
+      "type": "Button",
+      "pos": [2, 5],
+      "id": "btn1",
+      "targets": ["emitter1"]
+    },
+    {
+      "type": "LaserEmitter",
+      "pos": [5, 2],
+      "dir": "S",
+      "id": "emitter1"
+    },
+    {
+      "type": "PowerCell",
+      "pos": [5, 5],
+      "id": "cell1"
+    }
+  ]
+} 

@@ -1,0 +1,40 @@
+{
+  "id": "exit",
+  "name": "Çıkış Odası",
+  "size": [6, 6],
+  "exit": true,
+  "exits": { 
+    "W": [0, 3]
+  },
+  "prefabs": [
+    {
+      "type": "Door",
+      "pos": [4, 3],
+      "dir": "E",
+      "id": "exit_door",
+      "exit": true
+    },
+    {
+      "type": "LaserEmitter",
+      "pos": [1, 2],
+      "dir": "E",
+      "id": "emitter1"
+    },
+    {
+      "type": "LaserEmitter",
+      "pos": [1, 4],
+      "dir": "E",
+      "id": "emitter2"
+    },
+    {
+      "type": "PowerCell",
+      "pos": [3, 2],
+      "id": "exit_cell1"
+    },
+    {
+      "type": "PowerCell",
+      "pos": [3, 4],
+      "id": "exit_cell2"
+    }
+  ] 
+} 

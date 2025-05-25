@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wattsup - BTÜ - Duha KESKİN 22360859003</title>
+
+    <!-- Meta bilgileri -->
+    <meta name="description"
+        content="Wattsup - BTÜ - Türkçe lazer ışınları bulmaca oyunu. WASD ile hareket et, lazerlere çarpmadan çıkışa ulaş!">
+    <meta name="keywords" content="bulmaca oyunu, lazer oyunu, wattsup, javascript oyun, tarayıcı oyunu, türkçe oyun">
+    <meta name="author" content="Wattsup - BTÜ Takımı">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%231a1a2e'/><rect x='8' y='12' width='16' height='2' fill='%2300ff41'/><circle cx='16' cy='16' r='3' fill='%23e94560'/></svg>">
+
+    <style>
+        /* ===== GLOBAL STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 30%, #0f3460 70%, #2d3436 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ddd;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, #00ff41, transparent),
+                radial-gradient(2px 2px at 40px 70px, #74b9ff, transparent),
+                radial-gradient(1px 1px at 90px 40px, #e94560, transparent),
+                radial-gradient(1px 1px at 130px 80px, #00cec9, transparent);
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: sparkle 20s linear infinite;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        @keyframes sparkle {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+
+        /* ===== GAME CONTAINER ===== */
+        .game-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow:
+                0 15px 35px rgba(0, 0, 0, 0.6),
+                0 0 30px rgba(0, 255, 65, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* ===== GAME CANVAS ===== */
+        #game {
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            box-shadow:
+                0 0 25px rgba(0, 255, 65, 0.4),
+                inset 0 0 10px rgba(0, 0, 0, 0.3);
+            background: #1a1a2e;
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            transition: box-shadow 0.3s ease;
+        }
+
+        #game:focus {
+            outline: none;
+            box-shadow:
+                0 0 35px rgba(0, 255, 65, 0.6),
+                inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ===== LOADING SCREEN ===== */
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 26, 46, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+            border-radius: 15px;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #16213e;
+            border-top: 5px solid #00ff41;
+            border-right: 5px solid #74b9ff;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+            margin-bottom: 25px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-size: 20px;
+            color: #ddd;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .loading-progress {
+            width: 250px;
+            height: 6px;
+            background: #16213e;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .loading-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff41, #00cec9, #74b9ff);
+            width: 0%;
+            transition: width 0.3s ease;
+            animation: progressGlow 2s ease-in-out infinite alternate;
+            border-radius: 3px;
+        }
+
+        @keyframes progressGlow {
+            0% {
+                box-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 0 20px rgba(0, 255, 65, 0.9);
+            }
+        }
+
+        .game-info {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .game-title {
+            font-size: 28px;
+            color: #00ff41;
+            margin-bottom: 8px;
+            text-shadow:
+                0 0 15px rgba(0, 255, 65, 0.6),
+                0 2px 4px rgba(0, 0, 0, 0.5);
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .game-subtitle {
+            font-size: 16px;
+            color: #ddd;
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+
+        /* ===== CONTROLS INFO ===== */
+        .controls-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #bbb;
+            max-width: 600px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(83, 52, 131, 0.2);
+            border-radius: 6px;
+            border: 1px solid rgba(83, 52, 131, 0.3);
+        }
+
+        .key {
+            background: linear-gradient(145deg, #533483, #7209b7);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            min-width: 25px;
+            text-align: center;
+            font-size: 11px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .error-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(233, 69, 96, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            border-radius: 15px;
+        }
+
+        .error-text {
+            font-size: 18px;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 1200px) {
+            .game-container {
+                padding: 15px;
+                margin: 10px;
+            }
+
+            #game {
+                max-width: 90vw;
+                max-height: 90vh;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .controls-info {
+                grid-template-columns: 1fr;
+                font-size: 12px;
+            }
+
+            .game-title {
+                font-size: 24px;
+            }
+        }
+
+        .game-container {
+            will-change: transform;
+        }
+
+        #game {
+            will-change: box-shadow;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Ana oyun kapsayıcısı -->
+    <div class="game-container">
+        <!-- Oyun başlığı -->
+        <div class="game-title">Wattsup - BTÜ</div>
+        <div class="game-subtitle">Duha KESKİN 22360859003</div>
+
+        <!-- Oyun canvas -->
+        <canvas id="game" width="1024" height="1024" tabindex="0" aria-label="Wattsup - BTÜ oyun ekranı">
+            Tarayıcınız HTML5 Canvas elementini desteklemiyor.
+        </canvas>
+
+        <!-- Yükleme Ekranı -->
+        <div class="loading-screen" id="loading-screen">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loading-text">Oyun Yükleniyor...</div>
+            <div class="loading-progress">
+                <div class="loading-progress-bar" id="loading-progress-bar"></div>
+            </div>
+            <div class="loading-text" id="loading-detail">Sistemler başlatılıyor...</div>
+        </div>
+
+        <!-- Hata Ekranı -->
+        <div class="error-screen" id="error-screen">
+            <div class="error-text">Oyun Hatası</div>
+            <div class="error-message" id="error-message">
+                Oyun yüklenirken bir hata oluştu. Lütfen internet bağlantınızı kontrol edin ve tekrar deneyin.
+            </div>
+            <div class="error-actions">
+                <button class="error-button" onclick="window.location.reload()">Sayfayı Yenile</button>
+                <button class="error-button" onclick="hideError()">Kapat</button>
+            </div>
+        </div>
+
+        <!-- Oyun Bilgileri -->
+        <div class="game-info">
+            <div class="controls-info">
+                <div class="control-group">
+                    <span class="key">W</span>
+                    <span class="key">A</span>
+                    <span class="key">S</span>
+                    <span class="key">D</span>
+                    <span>Hareket</span>
+                </div>
+                <div class="control-group">
+                    <span class="key">SPACE</span>
+                    <span>İleri Atılma</span>
+                </div>
+                <div class="control-group">
+                    <span class="key">E</span>
+                    <span>Etkileşim</span>
+                </div>
+                <div class="control-group">
+                    <span class="key">R</span>
+                    <span>Yeniden Başla</span>
+                </div>
+                <div class="control-group">
+                    <span class="key">M</span>
+                    <span>Sesi Aç/Kapa</span>
+                </div>
+                <div class="control-group">
+                    <span class="key">ESC</span>
+                    <span>Menü/Duraklat</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Oyun yükleme ve başlatma scripti -->
+    <script type="module">
+        let loadingSteps = [
+            'Sistemler yükleniyor...',
+            'Tile verileri yükleniyor...',
+            'Lazer sistemleri kuruluyor...',
+            'UI bileşenleri hazırlanıyor...',
+            'Rastgele seviye oluşturuluyor...',
+            'Oyun başarıyla yüklendi!'
+        ];
+
+        let currentStep = 0;
+
+        function updateLoadingProgress(step, detail) {
+            const progressBar = document.getElementById('loading-progress-bar');
+            const loadingText = document.getElementById('loading-text');
+            const loadingDetail = document.getElementById('loading-detail');
+
+            if (step !== undefined) {
+                currentStep = step;
+            }
+
+            const progress = Math.min((currentStep / (loadingSteps.length - 1)) * 100, 100);
+            progressBar.style.width = progress + '%';
+
+            if (step < loadingSteps.length) {
+                loadingText.textContent = loadingSteps[step] || 'Yükleniyor...';
+            }
+
+            if (detail) {
+                loadingDetail.textContent = detail;
+            }
+        }
+
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.classList.add('hidden');
+
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 500);
+        }
+
+        function showError(message, title = 'Oyun Hatası') {
+            const errorScreen = document.getElementById('error-screen');
+            const errorMessage = document.getElementById('error-message');
+            const errorText = errorScreen.querySelector('.error-text');
+
+            errorText.textContent = title;
+            errorMessage.textContent = message;
+            errorScreen.style.display = 'flex';
+        }
+
+        function hideError() {
+            const errorScreen = document.getElementById('error-screen');
+            errorScreen.style.display = 'none';
+        }
+
+        window.showError = showError;
+        window.hideError = hideError;
+        window.updateLoadingProgress = updateLoadingProgress;
+
+        updateLoadingProgress(0);
+
+        async function loadGame() {
+            try {
+                updateLoadingProgress(1, 'Ana modüller yükleniyor...');
+
+                // Preload main game module
+                await import('./main.js');
+                console.log('Game module imported successfully');
+
+                updateLoadingProgress(2, 'Oyun sistemleri başlatılıyor...');
+
+                // Wait for DOMContentLoaded to ensure game initializes
+                if (document.readyState === 'loading') {
+                    await new Promise(resolve => {
+                        document.addEventListener('DOMContentLoaded', resolve, { once: true });
+                    });
+                }
+
+                updateLoadingProgress(3, 'UI kuruluyor...');
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                updateLoadingProgress(4, 'Oyun dünyası hazırlanıyor...');
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                updateLoadingProgress(5, 'Oyun hazır!');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Hide loading screen
+                hideLoadingScreen();
+
+                console.log('Game loaded successfully');
+
+
+            } catch (error) {
+                console.error('Failed to load game:', error);
+                showError(
+                    'Failed to load game modules. Please check your internet connection and try refreshing the page.',
+                    'Loading Error'
+                );
+            }
+        }
+
+        // Start loading process
+        loadGame();
+
+        // Error handling
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e.error);
+            showError(
+                `A critical error occurred: ${e.error?.message || 'Unknown error'}. The game may not function properly.`,
+                'Critical Error'
+            );
+        });
+
+        // Unhandled promise rejections
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            showError(
+                `An unexpected error occurred: ${e.reason?.message || 'Promise rejection'}. Please try refreshing the page.`,
+                'System Error'
+            );
+        });
+
+        // Prevent context menu on canvas
+        document.addEventListener('contextmenu', (e) => {
+            if (e.target.tagName === 'CANVAS') {
+                e.preventDefault();
+            }
+        });
+
+        // Focus canvas on load
+        window.addEventListener('load', () => {
+            const canvas = document.getElementById('game');
+            if (canvas) {
+                canvas.focus();
+            }
+        });
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (window.game) {
+                if (document.hidden) {
+                    // Game paused when tab not visible
+                    console.log('Game paused due to tab switch');
+                } else {
+                    // Game resumed when tab becomes visible
+                    console.log('Game resumed');
+                    const canvas = document.getElementById('game');
+                    if (canvas) {
+                        canvas.focus();
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
