@@ -1,8 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: false
----
-Try to make system reusable and solid so when values changed nothing brokes
-NEVER TRY TO CREATE ANOTHER TEST HTML ETC.
-
